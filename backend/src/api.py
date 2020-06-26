@@ -12,31 +12,62 @@ setup_db(app)
 CORS(app)
 
 '''
-@TODO uncomment the following line to initialize the datbase
+uncomment the following line to initialize the database
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
 # db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 '''
-@TODO implement endpoint
+endpoint
     GET /drinks
-        it should be a public endpoint
-        it should contain only the drink.short() data representation
+        a public endpoint
+        contains only the drink.short() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
 
 
+@app.route('/drinks')
+def get_drinks():
+    try:
+        drinks = Drink.query.all()
+        if not drinks:
+            abort(404)
+        drinks = [drink.short() for drink in drinks]
+        return jsonify({
+            'success': True,
+            'drinks': Drinks
+        })
+    except Exception as error:
+        raise error
+
+
 '''
-@TODO implement endpoint
+endpoint
     GET /drinks-detail
-        it should require the 'get:drinks-detail' permission
-        it should contain the drink.long() data representation
+        requires the 'get:drinks-detail' permission
+        contains the drink.long() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+
+
+@app.route('/drinks-detail')
+@requires_auth('get:drinks-detail')
+def get_drink_details(payload):
+    try:
+        drinks = Drink.query.all()
+        if not drinks:
+            abort(404)
+        drinks = [drink.long() for drink in drinks]
+        return jsonify({
+            'success': True,
+            'drinks': Drinks
+        })
+    except Exception as error:
+        raise error
 
 
 '''
@@ -75,17 +106,20 @@ CORS(app)
 '''
 
 
-## Error Handling
+# Error Handling
 '''
 Example error handling for unprocessable entity
 '''
+
+
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
+
 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
